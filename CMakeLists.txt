@@ -4,4 +4,5 @@ project(towerOfHanoi)
 set(CMAKE_CXX_STANDARD 20)
 
 add_executable(towerOfHanoi main.cpp
-        include/objects.h)
+        include/TowerOfHanoi.h
+)
