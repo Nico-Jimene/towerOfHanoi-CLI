@@ -1,10 +1,14 @@
 #include "include/TowerOfHanoi.h"
 #include <iomanip>
 #include <iostream>
+#include <ncurses.h>
+#include <readline/history.h>
+#include <readline/readline.h>
 #include <stack>
+#include <string>
 
-
-void gameplay(std::stack<std::vector<int>> &allTowers, int towerHeight) {
+void gameplay(std::stack<std::vector<int>> &allTowers, int towerHeight)
+{
 
     std::vector<int> finalTower = allTowers.top();
     allTowers.pop();
@@ -15,300 +19,441 @@ void gameplay(std::stack<std::vector<int>> &allTowers, int towerHeight) {
     std::vector<int> firstTower = allTowers.top();
     allTowers.pop();
 
-    char response = 0;
+    char response;
+    char towerFrom;
+    char towerTO;
+
     bool gameWon = false;
 
-    while (gameWon || response != 'n' || (secondTower.empty() && firstTower.empty())) {
+    while (gameWon || response != 'n' || (secondTower.empty() && firstTower.empty()))
+    {
 
-        int towerFrom = 0;
-        int towerTO = 0;
-
-        for (int i = 0; i < firstTower.size(); i++) {
-            std::cout << std::setw(3) << firstTower[i];
-            std::cout << std::setw(8) << secondTower[i];
-            std::cout << std::setw(8) << thirdTower[i];
-            std::cout << std::endl;
+        for (int i = 0; i < firstTower.size(); i++)
+        {
+            mvprintw(i + 10, 26, "%d", firstTower[i]);
+            mvprintw(i + 10, 52, "%d", secondTower[i]);
+            mvprintw(i + 10, 78, "%d", thirdTower[i]);
+            refresh();
         }
 
-        std::cout << "\nTower 1\t"
-                  << "Tower 2\t"
-                  << "Tower 3\t" << std::endl;
+        mvprintw(firstTower.size() + 12, 24, "Tower 1");
+        mvprintw(firstTower.size() + 12, 50, "Tower 2");
+        mvprintw(firstTower.size() + 12, 76, "Tower 3");
 
-        if (gameWon) {
+        if (gameWon)
+        {
             break;
         }
 
+        mvprintw(firstTower.size() + 20, 5, "Would you like to move?");
+        refresh();
 
-        std::cout << "Would you like to move?" << std::endl;
-        std::cin >> response;
+        while (true)
+        {
+            response = getch();
+            if (response == 'n' || response == 'y')
+            {
+                printw("%c", response); // Display the character
+                refresh();
+                break;
+            }
+        }
+        move(firstTower.size() + 20, 0);
+        clrtoeol();
+        refresh();
 
-        if (response == 'n') {
+        if (response == 'n')
+        {
+            printw("Goodbye");
             break;
-        } else if (response == 'y') {
-            std::cout << "Move From?" << std::endl;
-            std::cin >> towerFrom;
+        }
+        else if (response == 'y')
+        {
 
-            std::cout << "Move To?" << std::endl;
-            std::cin >> towerTO;
-            std::cout << "\n";
+            mvprintw(firstTower.size() + 20, 5, "Move From?");
+            refresh();
 
+            while (true)
+            {
+                towerFrom = getch();
+                if (towerFrom == '1' || towerFrom == '2' || towerFrom == '3')
+                {
+                    printw("%c", towerFrom); // Display the character
+                    refresh();
+                    break;
+                }
+            }
+            move(firstTower.size() + 20, 0);
+            clrtoeol();
+            refresh();
 
-            switch (towerFrom) {// Check for edge cases -> Putting a larger weight ontop of another block, Removing Zeros from Cout
-                case 1: {
-                    int val = 0;
-                    for (int i = 0; i < firstTower.size(); i++) {
-                        if (firstTower[i] != 0) {
-                            val = i;
-                            break;
-                        }
-                    }
+            mvprintw(firstTower.size() + 20, 5, "Move To?");
+            refresh();
 
-                    if (firstTower[val] == 0) {
+            while (true)
+            {
+                towerTO = getch();
+                if (towerTO == '1' || towerTO == '2' || towerTO == '3')
+                {
+                    printw("%c", towerTO); // Display the character
+                    refresh();
+                    break;
+                }
+            }
+            move(firstTower.size() + 20, 0);
+            clrtoeol();
+            refresh();
+
+            switch (towerFrom)
+            { // Check for edge cases -> Putting a larger weight ontop of another block, Removing Zeros from Cout
+            case '1':
+            {
+                int val = 0;
+                for (int i = 0; i < firstTower.size(); i++)
+                {
+                    if (firstTower[i] != 0)
+                    {
+                        val = i;
                         break;
-                    } else {
-
-                        switch (towerTO) {
-                            case 2: {
-
-                                int valTwo = 0;
-
-                                for (int i = 0; i < secondTower.size(); i++) {
-                                    if (secondTower[i] != 0) {
-                                        valTwo = i;
-                                        break;
-                                    }
-                                }
-
-                                if (secondTower.back() == 0) {
-                                    secondTower.pop_back();
-                                    secondTower.push_back(firstTower[val]);
-                                    firstTower[val] = 0;
-                                } else if (secondTower[valTwo] > firstTower[val] && --valTwo >= 0) {
-                                    secondTower[valTwo] = firstTower[val];
-                                    firstTower[val] = 0;
-                                } else {
-                                    std::cout << "Cannot Add Other Block" << std::endl;
-                                }
-                                break;
-                            }
-                            case 3: {
-                                int valThird = 0;
-
-                                for (int i = 0; i < thirdTower.size(); i++) {
-                                    if (thirdTower[i] != 0) {
-                                        valThird = i;
-                                        break;
-                                    }
-                                }
-
-                                if (thirdTower.back() == 0) {
-                                    thirdTower.pop_back();
-                                    thirdTower.push_back(firstTower[val]);
-                                    firstTower[val] = 0;
-                                }
-
-                                else if (firstTower[val] < thirdTower[valThird] && --valThird >= 0) {
-                                    thirdTower[valThird] = firstTower[val];
-                                    firstTower[val] = 0;
-                                }
-
-                                else {
-                                    std::cout << "Cannot Add Other Block" << std::endl;
-                                }
-
-                                break;
-                            }
-                            default: {
-                                std::cout << "Please Select the 2nd or 3rd Tower" << std::endl;
-                                break;
-                            }
-                        }
                     }
+                }
+
+                if (firstTower[val] == 0)
+                {
                     break;
                 }
-                case 2: {
-                    int val = 0;
-                    for (int i = 0; i < secondTower.size(); i++) {
-                        if (secondTower[i] != 0) {
-                            val = i;
-                            break;
+                else
+                {
+
+                    switch (towerTO)
+                    {
+                    case '2':
+                    {
+
+                        int valTwo = 0;
+
+                        for (int i = 0; i < secondTower.size(); i++)
+                        {
+                            if (secondTower[i] != 0)
+                            {
+                                valTwo = i;
+                                break;
+                            }
                         }
-                    }
 
-
-                    if (secondTower[val] == 0) {
+                        if (secondTower.back() == 0)
+                        {
+                            secondTower.pop_back();
+                            secondTower.push_back(firstTower[val]);
+                            firstTower[val] = 0;
+                        }
+                        else if (secondTower[valTwo] > firstTower[val] && --valTwo >= 0)
+                        {
+                            secondTower[valTwo] = firstTower[val];
+                            firstTower[val] = 0;
+                        }
+                        else
+                        {
+                            std::cout << "Cannot Add Other Block" << std::endl;
+                        }
                         break;
-                    } else {
+                    }
+                    case '3':
+                    {
+                        int valThird = 0;
 
-                        switch (towerTO) {
-                            case 1: {
-
-                                int valOne = 0;
-
-                                for (int i = 0; i < firstTower.size(); i++) {
-                                    if (firstTower[i] != 0) {
-                                        valOne = i;
-                                        break;
-                                    }
-                                }
-
-                                if (firstTower.back() == 0) {
-                                    firstTower.pop_back();
-                                    firstTower.push_back(secondTower[val]);
-                                    secondTower[val] = 0;
-                                } else if (secondTower[val] < firstTower[valOne] && --valOne >= 0) {
-                                    firstTower[valOne] = secondTower[val];
-                                    secondTower[val] = 0;
-                                } else {
-                                    std::cout << "Cannot Add Other Block" << std::endl;
-                                }
-                                break;
-                            }
-                            case 3: {
-                                int valThird = 0;
-
-                                for (int i = 0; i < thirdTower.size(); i++) {
-                                    if (thirdTower[i] != 0) {
-                                        valThird = i;
-                                        break;
-                                    }
-                                }
-
-                                if (thirdTower.back() == 0) {
-                                    thirdTower.pop_back();
-                                    thirdTower.push_back(secondTower[val]);
-                                    secondTower[val] = 0;
-                                } else if (secondTower[val] < thirdTower[valThird] && --valThird >= 0) {
-                                    thirdTower[valThird] = secondTower[val];
-                                    secondTower[val] = 0;
-                                } else {
-                                    std::cout << "Cannot Add Other Block" << std::endl;
-                                }
-
-                                break;
-                            }
-                            default: {
-                                std::cout << "Please Select the 1st or 3rd Tower" << std::endl;
+                        for (int i = 0; i < thirdTower.size(); i++)
+                        {
+                            if (thirdTower[i] != 0)
+                            {
+                                valThird = i;
                                 break;
                             }
                         }
-                    }
-                    break;
-                }
-                case 3: {
-                    int val = 0;
-                    for (int i = 0; i < thirdTower.size(); i++) {
-                        if (thirdTower[i] != 0) {
-                            val = i;
-                            break;
+
+                        if (thirdTower.back() == 0)
+                        {
+                            thirdTower.pop_back();
+                            thirdTower.push_back(firstTower[val]);
+                            firstTower[val] = 0;
                         }
-                    }
 
+                        else if (firstTower[val] < thirdTower[valThird] && --valThird >= 0)
+                        {
+                            thirdTower[valThird] = firstTower[val];
+                            firstTower[val] = 0;
+                        }
 
-                    if (thirdTower[val] == 0) {
+                        else
+                        {
+                            std::cout << "Cannot Add Other Block" << std::endl;
+                        }
+
                         break;
-                    } else {
+                    }
+                    default:
+                    {
+                        std::cout << "Please Select the 2nd or 3rd Tower" << std::endl;
+                        break;
+                    }
+                    }
+                }
+                break;
+            }
+            case '2':
+            {
+                int val = 0;
+                for (int i = 0; i < secondTower.size(); i++)
+                {
+                    if (secondTower[i] != 0)
+                    {
+                        val = i;
+                        break;
+                    }
+                }
 
-                        switch (towerTO) {
-                            case 1: {
+                if (secondTower[val] == 0)
+                {
+                    break;
+                }
+                else
+                {
 
-                                int valOne = 0;
+                    switch (towerTO)
+                    {
+                    case '1':
+                    {
 
-                                for (int i = 0; i < firstTower.size(); i++) {
-                                    if (firstTower[i] != 0) {
-                                        valOne = i;
-                                        break;
-                                    }
-                                }
+                        int valOne = 0;
 
-                                if (firstTower.back() == 0) {
-                                    firstTower.pop_back();
-                                    firstTower.push_back(thirdTower[val]);
-                                    thirdTower[val] = 0;
-                                } else if (thirdTower[val] < firstTower[valOne] && --valOne >= 0) {
-                                    firstTower[valOne] = thirdTower[val];
-                                    thirdTower[val] = 0;
-                                } else {
-                                    std::cout << "Cannot Add Other Block" << std::endl;
-                                }
-                                break;
-                            }
-                            case 2: {
-                                int valTwo = 0;
-
-                                for (int i = 0; i < secondTower.size(); i++) {
-                                    if (secondTower[i] != 0) {
-                                        valTwo = i;
-                                        break;
-                                    }
-                                }
-
-                                if (secondTower.back() == 0) {
-                                    secondTower.pop_back();
-                                    secondTower.push_back(thirdTower[val]);
-                                    thirdTower[val] = 0;
-                                } else if (thirdTower[val] < secondTower[valTwo] && --valTwo >= 0) {
-                                    secondTower[valTwo] = thirdTower[val];
-                                    thirdTower[val] = 0;
-                                } else {
-                                    std::cout << "Cannot Add Other Block" << std::endl;
-                                }
-
-                                break;
-                            }
-                            default: {
-                                std::cout << "Please Select the 1st or 3rd Tower" << std::endl;
+                        for (int i = 0; i < firstTower.size(); i++)
+                        {
+                            if (firstTower[i] != 0)
+                            {
+                                valOne = i;
                                 break;
                             }
                         }
+
+                        if (firstTower.back() == 0)
+                        {
+                            firstTower.pop_back();
+                            firstTower.push_back(secondTower[val]);
+                            secondTower[val] = 0;
+                        }
+                        else if (secondTower[val] < firstTower[valOne] && --valOne >= 0)
+                        {
+                            firstTower[valOne] = secondTower[val];
+                            secondTower[val] = 0;
+                        }
+                        else
+                        {
+                            std::cout << "Cannot Add Other Block" << std::endl;
+                        }
+                        break;
                     }
+                    case '3':
+                    {
+                        int valThird = 0;
+
+                        for (int i = 0; i < thirdTower.size(); i++)
+                        {
+                            if (thirdTower[i] != 0)
+                            {
+                                valThird = i;
+                                break;
+                            }
+                        }
+
+                        if (thirdTower.back() == 0)
+                        {
+                            thirdTower.pop_back();
+                            thirdTower.push_back(secondTower[val]);
+                            secondTower[val] = 0;
+                        }
+                        else if (secondTower[val] < thirdTower[valThird] && --valThird >= 0)
+                        {
+                            thirdTower[valThird] = secondTower[val];
+                            secondTower[val] = 0;
+                        }
+                        else
+                        {
+                            std::cout << "Cannot Add Other Block" << std::endl;
+                        }
+
+                        break;
+                    }
+                    default:
+                    {
+                        std::cout << "Please Select the 1st or 3rd Tower" << std::endl;
+                        break;
+                    }
+                    }
+                }
+                break;
+            }
+            case '3':
+            {
+                int val = 0;
+                for (int i = 0; i < thirdTower.size(); i++)
+                {
+                    if (thirdTower[i] != 0)
+                    {
+                        val = i;
+                        break;
+                    }
+                }
+
+                if (thirdTower[val] == 0)
+                {
                     break;
                 }
-                default: {
-                    std::cout << "Please Select" << std::endl;
-                    break;
+                else
+                {
+
+                    switch (towerTO)
+                    {
+                    case '1':
+                    {
+
+                        int valOne = 0;
+
+                        for (int i = 0; i < firstTower.size(); i++)
+                        {
+                            if (firstTower[i] != 0)
+                            {
+                                valOne = i;
+                                break;
+                            }
+                        }
+
+                        if (firstTower.back() == 0)
+                        {
+                            firstTower.pop_back();
+                            firstTower.push_back(thirdTower[val]);
+                            thirdTower[val] = 0;
+                        }
+                        else if (thirdTower[val] < firstTower[valOne] && --valOne >= 0)
+                        {
+                            firstTower[valOne] = thirdTower[val];
+                            thirdTower[val] = 0;
+                        }
+                        else
+                        {
+                            std::cout << "Cannot Add Other Block" << std::endl;
+                        }
+                        break;
+                    }
+                    case '2':
+                    {
+                        int valTwo = 0;
+
+                        for (int i = 0; i < secondTower.size(); i++)
+                        {
+                            if (secondTower[i] != 0)
+                            {
+                                valTwo = i;
+                                break;
+                            }
+                        }
+
+                        if (secondTower.back() == 0)
+                        {
+                            secondTower.pop_back();
+                            secondTower.push_back(thirdTower[val]);
+                            thirdTower[val] = 0;
+                        }
+                        else if (thirdTower[val] < secondTower[valTwo] && --valTwo >= 0)
+                        {
+                            secondTower[valTwo] = thirdTower[val];
+                            thirdTower[val] = 0;
+                        }
+                        else
+                        {
+                            std::cout << "Cannot Add Other Block" << std::endl;
+                        }
+
+                        break;
+                    }
+                    default:
+                    {
+                        std::cout << "Please Select the 1st or 3rd Tower" << std::endl;
+                        break;
+                    }
+                    }
                 }
+                break;
+            }
+            default:
+            {
+                std::cout << "Please Select" << std::endl;
+                break;
+            }
             }
         }
 
         int check = 0;
-        for (int i = 0; i < towerHeight; i++) {
-            if (thirdTower[i] == finalTower[i]) {
+        for (int i = 0; i < towerHeight; i++)
+        {
+            if (thirdTower[i] == finalTower[i])
+            {
                 ++check;
             }
         }
 
-        if (check == towerHeight) {
+        if (check == towerHeight)
+        {
             gameWon = true;
-            std::cout << "YOU WON!!!\n\n"
-                      << std::endl;
+            printw("YOU WON!!!!");
+            refresh();
+            endwin();
         }
     }
 }
 
-
-std::vector<int> towerCreation(int weight_input) {
+std::vector<int> towerCreation(int weight_input)
+{
 
     std::vector<int> tower;
-    for (int i = 1; i < weight_input + 1; i++) {
+    for (int i = 1; i < weight_input + 1; i++)
+    {
         tower.push_back(i);
     }
 
     return tower;
 }
 
-std::vector<int> emptyTower(int weight_input) {
+std::vector<int> emptyTower(int weight_input)
+{
 
     std::vector<int> tower;
-    for (int i = 1; i < weight_input + 1; i++) {
+    for (int i = 1; i < weight_input + 1; i++)
+    {
         tower.push_back(0);
     }
 
     return tower;
 }
 
+std::stack<std::vector<int>> initializeTowers()
+{
 
-void initializeTowers(int stacks) {
+    int stacks = 0;
+    char ch;
+
+    printw("Please Enter Number Of Stacks (1-9): ");
+
+    while (true)
+    {
+        ch = getch();
+        if (isdigit(ch))
+        {
+            stacks = (ch - '0');
+            printw("%d", stacks);
+            refresh();
+            break;
+        }
+    }
 
     std::stack<std::vector<int>> allTowers;
 
@@ -316,7 +461,6 @@ void initializeTowers(int stacks) {
     std::vector<int> secondTower;
     std::vector<int> thirdTower;
     std::vector<int> finalTower;
-
 
     firstTower = towerCreation(stacks);
     secondTower = emptyTower(stacks);
@@ -328,22 +472,120 @@ void initializeTowers(int stacks) {
     allTowers.push(thirdTower);
     allTowers.push(finalTower);
 
-    gameplay(allTowers, stacks);
+    // gameplay(allTowers, stacks);
 }
 
-void displayGameMenu() {
-    clearScreen();
-    std::cout << "Tower of Hanoi Game" << std::endl;
-    std::cout << "1. Press Space to Start\n";
-    std::cout << "2. Instructions For Game (Press I)" << std::endl;
+void displayGameMenu()
+{
+
+    printw("Tower of Hanoi Game\n\n");
+    printw("1. Start Game (Press Space)\n");
+    printw("2. Instructions For Game (Press i)\n\n");
 }
 
-int main() {
+int main()
+{
     // Need to add CLI Features
+    initscr();
+    cbreak();
+    noecho();
+    keypad(stdscr, true);
+    displayGameMenu();
+    refresh();
+    int ch;
+
+    while (true)
+    {
+        ch = getch();
+        switch (ch)
+        {
+        case ' ':
+        {
+            clear();
+            refresh();
+            std::stack<std::vector<int>> combinedTowers = initializeTowers();
+
+            std::cout << "it worked";
+            int xCord = 29;
+            int yCord = 22;
+
+            int maxXCord;
+            int maxYCord;
+            getmaxyx(stdscr, maxYCord, maxXCord);
+            int count = 0;
+
+            while (true)
+            {
+
+                refresh();
+                clear();
+
+                mvprintw(yCord, xCord, "1");
+
+                int input = getch();
+
+                switch (input)
+                {
+                case KEY_UP:
+                    yCord = (yCord - 9);
+                    break;
+                case KEY_DOWN:
+                    yCord = (yCord + 10);
+                    break;
+                case KEY_LEFT:
+                    if (xCord - 29 < 29)
+                    {
+                        xCord = 29;
+                    }
+                    else
+                    {
+                        xCord -= 29;
+                    }
+                    break;
+                case KEY_RIGHT:
+
+                    if (xCord + 29 > 87)
+                    {
+                        xCord = 87;
+                    }
+                    else
+                    {
+                        xCord += 29;
+                    }
+                    break;
+                case ' ':
+                    // yCord = (yCord + 9);
+                    break;
+                case 'q': // Quit if 'q' is pressed
+                    endwin();
+                    return 0;
+                default:
+                    break;
+                }
+            }
+
+            endwin();
+
+            break;
+        }
+        case 'i':
+        {
+            clear();
+            refresh();
+            printw("Instructions Listed");
+            break;
+        }
+            //            default: {
+            //                std::cout << "Please choose an option" << std::endl;
+            //                break;
+            //            }
+        }
+    }
+
+    return 0;
     int result = 0;
     std::cout << "How many Stacks?" << std::endl;
     std::cin >> result;
-
 
     //    displayGameMenu();
     //    char choice;
